@@ -1,0 +1,13 @@
+[package]
+name = "chess_game"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+# Dependencies for the Chess game
+[dependencies]
+actix-web = "4.0"
+actix-ws = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
