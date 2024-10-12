@@ -121,3 +121,146 @@ impl Temperature {
     fn new(value: f32, scale: TemperatureScale) -> Self {
         Temperature { value, scale }
     }
+
+    /*
+    	#[inline] is a hint to the compiler that this function is a good candidate
+    	for inlining, but the compiler may choose not to inline it.
+    	This is more flexible than #[inline(always)] as it allows the compiler
+    	to make the final decision based on the context where the function is used.
+    */
+
+    #[inline]
+    fn convert(&self, target_scale: TemperatureScale) -> f32 {
+
+    /*
+	These matrices are used to perform temperature conversions efficiently.
+	Instead of using if-else statements or match expressions for each
+	conversion type, we use these matrices as lookup tables.
+
+	Using matrices for conersion offers several advantages over if-else statements:
+	1. Performance: Matrix lookups are typically faster than branching (if-else).
+	    This is because it avoids branch prediction misses, which can be costly
+	2. Consistency: All conversions are handled uniformly, reducing the chance of errors.
+	3. Maintainability: Adding new scales requires just adding new rows/columns to the matrices.
+	4. Readability: The conversion logic is centralized and easy to understand at a glance.
+
+	For example, an if-else approach might look like this:
+	if self.scale == TemperatureScale::Celsius && target_scale == TemperatureScale::Fahrenheit{
+	    return self.value * 1.8 + 32.0;
+	} else if ...
+
+	This would require 6 different conditions for all possible conversions, making the code
+	longer and potentially slower due to branch prediction misses.
+
+	The matrix approach allows us to perform any conversion with just two array lookups
+	and a simple calculation, regardless of the scales involved.
+    */
+
+    const CONVERSION_FACTORS: [[f32; 3]; 3] = [
+        [1.0, 1.0, 1.00],	//Celcius to X
+        [5.0/9.0, 1.0, 5.0/9.0],	// Fahrenheit to X
+        [1.0, 1.0, 1.0]];	// Kelvin to X
+
+    const CONVERSION_OFFSETS: [[f32; 3]; 3] = [
+        [0.0, 32.0, 273.15],	//Celcius to X
+        [-32.0, 0.0, 459.67], 	// Fahrenheit to X
+        [-273.15, -459.67, 0.0]]; // Kelvin to X
+
+    if self.scale == target_scale {
+        return self.value;
+    }
+
+    /*
+	We use the enum variants as indices into our matrices.
+	'from' represents the row (current scale), 'to' represents the column (target scale).
+	This works because we've defined our TemperatureScale enum with explicit values
+	that correspond to the matrix indices.
+    */
+
+    let from = self.scale as usize;
+    let to = target_scale as usize;
+
+    /*
+	The conversion formula is:
+	Converted Temperature = ((Original Temperature - Offset to Celsius) × Factor from Celsius to Target) + Offset from Celsius to Target
+	We look up the appropriate offset and factor from our matrices
+	and perform the calculation.
+	This single line replaces what would otherwise be multiple if-else statments.
+    */
+    (self.value - CONVERSION_OFFSETS[from][0]) * CONVERSION_FACTORS[0][to] + CONVERSION_OFFSETS[0][to]
+    }
+    /*
+	(self.value - CONVERSION_OFFSETS[from][0]): This adjusts the value as if we 
+	were converting to Celsius, but we don't complete that conversion.
+	* CONVERSION_FACTORS[0][to]: This multiplies by the factor that would 
+	be used to convert from Celsius to the target scale.
+	+ CONVERSION_OFFSETS[0][to]: This adds the offset that would be used when 
+	converting from Celsius to the target scale.
+
+	The clever part is that this combination of operations mathematically simplifies 
+	to the correct direct conversion between the scales, without actually going 
+	through Celsius as an intermediate value.
+    */
+		
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
